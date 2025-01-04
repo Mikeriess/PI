@@ -1,40 +1,47 @@
+from flask import Flask, Response
 import cv2
-import gradio as gr
 
-def video_feed():
-    # Initialize the webcam (0 is usually the default USB webcam)
-    cap = cv2.VideoCapture(0)
-    
-    # Ensure the webcam is opened correctly
-    if not cap.isOpened():
-        raise RuntimeError("Failed to open webcam")
-    
+app = Flask(__name__)
+
+def generate_frames():
+    camera = cv2.VideoCapture(0)
     try:
         while True:
-            ret, frame = cap.read()
-            if not ret:
+            success, frame = camera.read()
+            if not success:
                 break
-                
-            # Convert BGR (OpenCV format) to RGB (what Gradio expects)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            yield frame
-    
+            
+            # Encode frame to JPEG
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            
+            # Yield the frame in byte format
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
     finally:
-        # Release the webcam when done
-        cap.release()
+        camera.release()
 
-# Create Gradio interface
-def create_ui():
-    return gr.Interface(
-        fn=video_feed,
-        inputs=None,
-        outputs="image",
-        live=True,
-        title="Raspberry Pi Webcam Stream",
-        description="Live video stream from USB webcam"
-    )
+@app.route('/')
+def index():
+    return """
+    <html>
+        <head>
+            <title>Raspberry Pi Camera Stream</title>
+            <style>
+                body { margin: 0; background: black; }
+                img { width: 100%; height: 100vh; object-fit: contain; }
+            </style>
+        </head>
+        <body>
+            <img src="/video_feed">
+        </body>
+    </html>
+    """
 
-if __name__ == "__main__":
-    ui = create_ui()
-    # Launch the interface on 0.0.0.0 to make it accessible from other devices
-    ui.launch(server_name="0.0.0.0", server_port=7860) 
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(),
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8000, threaded=True) 

@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application
 COPY app.py .
 
-# Expose the port Gradio will run on
-EXPOSE 7860
+# Expose the port Flask will run on
+EXPOSE 8000
 
 # Run the application
 CMD ["python", "app.py"] 
