@@ -1,0 +1,4 @@
+.codegpt
+__pycache__/
+*.pyc
+.env
