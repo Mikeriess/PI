@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  webcam-stream:
+    build: .
+    container_name: webcam-stream
+    restart: unless-stopped  # Automatically restart container unless manually stopped
+    devices:
+      - /dev/video0:/dev/video0  # Pass through the webcam device
+    ports:
+      - "8000:8000"  # Map container port to host port
+    networks:
+      - webcam-net
+
+networks:
+  webcam-net:
+    driver: bridge 
