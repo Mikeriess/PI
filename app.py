@@ -9,29 +9,29 @@ def video_feed():
     if not cap.isOpened():
         raise RuntimeError("Failed to open webcam")
     
-    # Continuously capture frames
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-            
-        # Convert BGR (OpenCV format) to RGB (what Gradio expects)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        yield frame
+    try:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                break
+                
+            # Convert BGR (OpenCV format) to RGB (what Gradio expects)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            yield frame
     
-    # Release the webcam when done
-    cap.release()
+    finally:
+        # Release the webcam when done
+        cap.release()
 
 # Create Gradio interface
 def create_ui():
     return gr.Interface(
-        fn=lambda: None,  # No processing function needed
+        fn=video_feed,
         inputs=None,
-        outputs=gr.Image(streaming=True),
+        outputs="image",
         live=True,
         title="Raspberry Pi Webcam Stream",
-        description="Live video stream from USB webcam",
-        streaming=video_feed
+        description="Live video stream from USB webcam"
     )
 
 if __name__ == "__main__":
