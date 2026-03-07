@@ -17,6 +17,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the application
 COPY app.py .
 
+# Create directory for saved images
+RUN mkdir -p /app/captured_images
+
+# Set permissions
+RUN chmod -R 777 /app/captured_images
+
 # Expose the port Flask will run on
 EXPOSE 8000
 
