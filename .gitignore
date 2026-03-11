@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .env
 captured_images/
+.DS_Store
