@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOASTER — Live Stream</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: #111;
+            border-bottom: 1px solid #222;
+        }
+
+        header h1 {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: #fff;
+        }
+
+        #status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        #status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #444;
+            transition: background 0.3s;
+        }
+
+        #status-dot.connected { background: #4caf50; }
+        #status-dot.disconnected { background: #f44336; }
+
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        #stream {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>TOASTER — Live Stream</h1>
+        <div id="status">
+            <div id="status-dot"></div>
+            <span id="status-text">Forbinder...</span>
+        </div>
+    </header>
+    <main>
+        <img id="stream" src="/video_feed" alt="Live stream">
+    </main>
+
+    <script>
+        const dot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        async function checkHealth() {
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                if (data.relay_connected) {
+                    dot.className = 'connected';
+                    statusText.textContent = 'Forbundet';
+                } else {
+                    dot.className = 'disconnected';
+                    statusText.textContent = 'Venter på Pi...';
+                }
+            } catch {
+                dot.className = 'disconnected';
+                statusText.textContent = 'Fejl';
+            }
+        }
+
+        checkHealth();
+        setInterval(checkHealth, 5000);
+    </script>
+</body>
+</html>

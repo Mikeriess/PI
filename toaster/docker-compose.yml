@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  toaster-stream:
+    build: .
+    container_name: toaster-stream
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - PI_STREAM_URL=${PI_STREAM_URL:-http://192.168.1.XX:8000/video_feed}
+    networks:
+      - toaster-net
+
+networks:
+  toaster-net:
+    driver: bridge
